@@ -147,7 +147,6 @@ def a_star_search(problem, heuristic=null_heuristic):
     visited = list()
     while not fringe.isEmpty():
         currentNode = fringe.pop()
-        currentCost = currentNode.price
         currentPath = currentNode.item[0]
         currentTruple = currentNode.item[1]
         currentState = currentTruple[0]
@@ -158,7 +157,7 @@ def a_star_search(problem, heuristic=null_heuristic):
             return currentPath
         for states in problem.get_successors(currentState):
             if states[0] not in visited:
-                cost=currentCost + states[2]+ heuristic(states[0],problem)
+                cost=problem.get_cost_of_actions(currentPath) + states[2]+ heuristic(states[0],problem)
                 fringe.push(UNCNode((currentPath.copy(), states),cost ),cost)
     return list()
 

@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs
+from search import SearchProblem, ucs, astar
 import util
 
 
@@ -132,18 +132,25 @@ def blokus_corners_heuristic(BoardState, problem):
     return sum
 
 def NewYork(x,y,options):
-    min=0
+    min=1000
     for o in options:
-        currentValue=util.manhattanDistance([x,y],[o[0],o[1]])
+        currentValue=util.manhattanDistance([x,y],[o[0],o[1]])+1
         if currentValue < min:
             min=currentValue
     return min
 
 class BlokusCoverProblem(SearchProblem):
-    def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
+    def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)], board=None):
         self.targets = targets.copy()
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
+        self.startingPoint = starting_point
+        self.boardW = board_w
+        self.boardH = board_h
+        self.pieceList = piece_list
+        if board is not None:
+            self.board = board
+        else:
+            self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
         """
@@ -152,8 +159,11 @@ class BlokusCoverProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        boo=True
+        for target in self.targets:
+            boo=(boo and (state.get_position(target[0], target[1]) > -1))
+
+        return boo
 
     def get_successors(self, state):
         """
@@ -176,13 +186,26 @@ class BlokusCoverProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if actions is None:
+            return 99999
+        cost=0
+        for action in actions:
+            cost+=len(action.orientation)
+        return cost
 
 
-def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+def blokus_cover_heuristic(BoardState, problem):
+    sum=0
+    legals=list()
+    for x in range (problem.boardH):
+        for y in range(problem.boardW):
+            if BoardState.connected[0,y,x] and BoardState.state[y,x] == -1:
+                legals.append([x,y])
+    for target in problem.targets:
+        if not BoardState.get_position(target[0], target[1]) > -1:
+            sum += NewYork(target[0], target[1], legals)
+
+    return sum
 
 
 class ClosestLocationSearch:
@@ -194,7 +217,11 @@ class ClosestLocationSearch:
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
         self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
+        self.startingPoint = starting_point
+        self.boardW = board_w
+        self.boardH = board_h
+        self.pieceList = piece_list
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
         """
@@ -221,10 +248,35 @@ class ClosestLocationSearch:
 
         return backtrace
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        target = self.closestPoint([self.startingPoint])
+        path = []
+        while target is not None:
+            coverProblem = BlokusCoverProblem(self.boardW, self.boardH, self.pieceList, self.startingPoint, [target], self.board)
+            actions = astar(coverProblem, blokus_cover_heuristic)
+            for action in actions:
+                path.append(action)
+                self.board.add_move(0, action)
+            self.pieceList = self.board.piece_list
+            legals = list()
+            for x in range(self.boardH):
+                for y in range(self.boardW):
+                    if self.board.connected[0, y, x] and self.board.state[y, x] == -1:
+                        legals.append([x, y])
+            target = self.closestPoint(legals)
+        return path
 
 
+    def closestPoint(self,legals):
+        minDistance = 1000
+        closestPoint = None
+        for target in self.targets:
+            if not self.board.get_position(target[0], target[1]) > -1:
+                distance = NewYork(target[0], target[1], legals)
+                if distance < minDistance:
+                    minDistance = distance
+                    closestPoint = (target[0], target[1])
+
+        return closestPoint
 
 class MiniContestSearch :
     """
