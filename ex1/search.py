@@ -105,28 +105,30 @@ def uniform_cost_search(problem):
     Search the node of least total cost first.
     """
     fringe=util.PriorityQueue()
-    cost=util.PriorityQueue()
-    fringe.push((list(),(problem.get_start_state(),None,0)),0)
-    cost.push(0,0)
-    visited=list()
+    fringe.push(UNCNode((list(),(problem.get_start_state(),None,0)),0),0)
+    visited=set()
     while not fringe.isEmpty():
         currentNode=fringe.pop()
-        currentCost=cost.pop()
-        currentPath=currentNode[0]
-        currentTruple=currentNode[1]
+        currentCost=currentNode.price
+        currentPath=currentNode.item[0]
+        currentTruple=currentNode.item[1]
         currentState=currentTruple[0]
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
-        visited.append(currentState)
+        visited.add(currentState)
         if problem.is_goal_state(currentState):
             return currentPath
         for states in problem.get_successors(currentState):
             if states[0] not in visited:
-                fringe.push((currentPath.copy(),states),currentCost+states[2])
-                cost.push(currentCost+states[2],currentCost+states[2])
+                fringe.push(UNCNode((currentPath.copy(),states),currentCost+states[2]),currentCost+states[2])
     return list()
 
-
+class UNCNode:
+    def __init__(self,item,price):
+        self.price=price
+        self.item=item
+    def __le__(self, other):
+        return True
 
 def null_heuristic(state, problem=None):
     """
@@ -140,17 +142,15 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    fringe=util.PriorityQueue()
-    costList=util.PriorityQueue()
-    fringe.push((list(),(problem.get_start_state(),None,0)),0)
-    costList.push(0,0)
-    visited=list()
+    fringe = util.PriorityQueue()
+    fringe.push(UNCNode((list(), (problem.get_start_state(), None, 0)), 0), 0)
+    visited = list()
     while not fringe.isEmpty():
-        currentNode=fringe.pop()
-        currentCost=costList.pop()
-        currentPath=currentNode[0]
-        currentTruple=currentNode[1]
-        currentState=currentTruple[0]
+        currentNode = fringe.pop()
+        currentCost = currentNode.price
+        currentPath = currentNode.item[0]
+        currentTruple = currentNode.item[1]
+        currentState = currentTruple[0]
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
         visited.append(currentState)
@@ -158,9 +158,8 @@ def a_star_search(problem, heuristic=null_heuristic):
             return currentPath
         for states in problem.get_successors(currentState):
             if states[0] not in visited:
-                cost = heuristic(states[0],problem)+currentCost+states[2]
-                fringe.push((currentPath.copy(),states),cost)
-                costList.push(cost,cost)
+                cost=currentCost + states[2]+ heuristic(states[0],problem)
+                fringe.push(UNCNode((currentPath.copy(), states),cost ),cost)
     return list()
 
 

@@ -57,8 +57,8 @@ class BlokusFillProblem(SearchProblem):
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
-        self.boardW=board_w
-        self.boardH=board_h
+        self.boardW =board_w
+        self.boardH =board_h
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -70,9 +70,9 @@ class BlokusCornersProblem(SearchProblem):
     def is_goal_state(self, boardState):
 
         return (boardState.state[0,0] > -1) \
-               and (boardState.state[self.boardW - 1, 0] > -1)\
-               and (boardState.state[0, self.boardH - 1] > -1) \
-                and (boardState.state[self.boardH-1,self.boardW-1] > -1)
+               and (boardState.state[ -1, 0] > -1)\
+               and (boardState.state[0,-1] > -1) \
+                and (boardState.state[-1,-1] > -1)
 
     def get_successors(self, state):
         """
@@ -103,7 +103,7 @@ class BlokusCornersProblem(SearchProblem):
         return cost
 
 
-def blokus_corners_heuristic(state, problem):
+def blokus_corners_heuristic(BoardState, problem):
     """
     Your heuristic for the BlokusCornersProblem goes here.
 
@@ -115,8 +115,25 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    sum=0
+    legals=BoardState.get_legal_moves(0)
+    if not BoardState.state[0,0]>-1:
+        sum+=NewYork(0,0,legals)
+    if not BoardState.state[-1,0]>-1:
+        sum+=NewYork(problem.boardW-1,0,legals)
+    if not BoardState.state[0, -1] > -1:
+        sum+=NewYork(0,problem.boardH-1,legals)
+    if not BoardState.state[-1, -1] > -1:
+        sum += NewYork(problem.boardW - 1, problem.boardH - 1, legals)
+    return sum
+
+def NewYork(x,y,options):
+    min=0
+    for o in options:
+        currentValue=util.manhattanDistance([x,y],[o.x,o.y])
+        if currentValue < min:
+            min=currentValue
+    return min
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
