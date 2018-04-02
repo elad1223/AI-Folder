@@ -83,7 +83,7 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     fringe=util.Queue()
-    fringe.push(((problem.get_start_state(),None,1),list()))
+    fringe.push(((problem.get_start_state(),None,0),list()))
     visited=list()
     while not fringe.isEmpty():
         currentNode=fringe.pop()
@@ -104,8 +104,28 @@ def uniform_cost_search(problem):
     """
     Search the node of least total cost first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe=util.PriorityQueue()
+    cost=util.PriorityQueue()
+    fringe.push((list(),(problem.get_start_state(),None,0)),0)
+    cost.push(0,0)
+    visited=list()
+    while not fringe.isEmpty():
+        currentNode=fringe.pop()
+        currentCost=cost.pop()
+        currentPath=currentNode[0]
+        currentTruple=currentNode[1]
+        currentState=currentTruple[0]
+        if currentTruple[1] is not None:
+            currentPath.append(currentTruple[1])
+        visited.append(currentState)
+        if problem.is_goal_state(currentState):
+            return currentPath
+        for states in problem.get_successors(currentState):
+            if states[0] not in visited:
+                fringe.push((currentPath.copy(),states),currentCost+states[2])
+                cost.push(currentCost+states[2],currentCost+states[2])
+    return list()
+
 
 
 def null_heuristic(state, problem=None):
@@ -120,8 +140,28 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe=util.PriorityQueue()
+    costList=util.PriorityQueue()
+    fringe.push((list(),(problem.get_start_state(),None,0)),0)
+    costList.push(0,0)
+    visited=list()
+    while not fringe.isEmpty():
+        currentNode=fringe.pop()
+        currentCost=costList.pop()
+        currentPath=currentNode[0]
+        currentTruple=currentNode[1]
+        currentState=currentTruple[0]
+        if currentTruple[1] is not None:
+            currentPath.append(currentTruple[1])
+        visited.append(currentState)
+        if problem.is_goal_state(currentState):
+            return currentPath
+        for states in problem.get_successors(currentState):
+            if states[0] not in visited:
+                cost = heuristic(states[0],problem)+currentCost+states[2]
+                fringe.push((currentPath.copy(),states),cost)
+                costList.push(cost,cost)
+    return list()
 
 
 

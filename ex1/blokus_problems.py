@@ -118,7 +118,6 @@ def blokus_corners_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
-
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
         self.targets = targets.copy()
