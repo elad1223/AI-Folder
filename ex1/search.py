@@ -106,7 +106,7 @@ def uniform_cost_search(problem):
     """
     fringe=util.PriorityQueue()
     fringe.push(UNCNode((list(),(problem.get_start_state(),None,0)),0),0)
-    visited=list()
+    visited=set()
     while not fringe.isEmpty():
         currentNode=fringe.pop()
         currentCost=currentNode.price
@@ -115,7 +115,7 @@ def uniform_cost_search(problem):
         currentState=currentTruple[0]
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
-        visited.append(currentState)
+        visited.add(currentState)
         if problem.is_goal_state(currentState):
             return currentPath
         for states in problem.get_successors(currentState):
@@ -158,7 +158,7 @@ def a_star_search(problem, heuristic=null_heuristic):
             return currentPath
         for states in problem.get_successors(currentState):
             if states[0] not in visited:
-                cost=currentCost + states[2]+ heuristic(states[0])
+                cost=currentCost + states[2]+ heuristic(states[0],problem)
                 fringe.push(UNCNode((currentPath.copy(), states),cost ),cost)
     return list()
 
