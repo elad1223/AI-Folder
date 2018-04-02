@@ -128,12 +128,7 @@ def blokus_corners_heuristic(BoardState, problem):
     return sum
 
 def NewYork(x,y,options):
-    min=0
-    for o in options:
-        currentValue=util.manhattanDistance([x,y],[o.x,o.y])
-        if currentValue < min:
-            min=currentValue
-    return min
+    return min([util.manhattanDistance([x,y],[move.x,move.y]) for move in options])
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
