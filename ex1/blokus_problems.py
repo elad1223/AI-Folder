@@ -119,7 +119,7 @@ def blokus_corners_heuristic(BoardState, problem):
     legals=list()
     for x in range (problem.boardH):
         for y in range(problem.boardW):
-            if BoardState.connected[0,y,x] and BoardState.state == -1:
+            if BoardState.connected[0,y,x] and BoardState.state[y,x] == -1:
                 legals.append([x,y])
     if not BoardState.state[0,0]>-1:
         sum+=NewYork(0,0,legals)
