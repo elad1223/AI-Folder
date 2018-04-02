@@ -116,7 +116,11 @@ def blokus_corners_heuristic(BoardState, problem):
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
     sum=0
-    legals=BoardState.get_legal_moves(0)
+    legals=list()
+    for x in range (problem.boardH):
+        for y in range(problem.boardW):
+            if BoardState.connected[0,y,x] and BoardState.state[y,x] == -1:
+                legals.append([x,y])
     if not BoardState.state[0,0]>-1:
         sum+=NewYork(0,0,legals)
     if not BoardState.state[-1,0]>-1:
@@ -130,7 +134,7 @@ def blokus_corners_heuristic(BoardState, problem):
 def NewYork(x,y,options):
     min=0
     for o in options:
-        currentValue=util.manhattanDistance([x,y],[o.x,o.y])
+        currentValue=util.manhattanDistance([x,y],[o[0],o[1]])
         if currentValue < min:
             min=currentValue
     return min
