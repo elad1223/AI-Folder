@@ -90,12 +90,17 @@ def breadth_first_search(problem):
         currentPath=currentNode[1]
         currentTruple=currentNode[0]
         currentState=currentTruple[0]
+        if currentState in visited:
+            continue
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
         visited.append(currentState)
         if problem.is_goal_state(currentState):
             return currentPath
         for states in problem.get_successors(currentState):
+            if problem.is_goal_state(states[0]):
+                currentPath.append(states[1])
+                return currentPath
             if states[0] not in visited:
                 fringe.push((states,currentPath.copy()))
     return list()
@@ -113,12 +118,17 @@ def uniform_cost_search(problem):
         currentPath=currentNode.item[0]
         currentTruple=currentNode.item[1]
         currentState=currentTruple[0]
+        if currentState in visited:
+            continue
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
         visited.add(currentState)
         if problem.is_goal_state(currentState):
             return currentPath
         for states in problem.get_successors(currentState):
+            if problem.is_goal_state(states[0]):
+                currentPath.append(states[1])
+                return currentPath
             if states[0] not in visited:
                 fringe.push(UNCNode((currentPath.copy(),states),currentCost+states[2]),currentCost+states[2])
     return list()
@@ -128,7 +138,7 @@ class UNCNode:
         self.price=price
         self.item=item
     def __le__(self, other):
-        return True
+        return util.flipCoin(0.5)
 
 def null_heuristic(state, problem=None):
     """
@@ -160,8 +170,6 @@ def a_star_search(problem, heuristic=null_heuristic):
                 cost=problem.get_cost_of_actions(currentPath) + states[2]+ heuristic(states[0],problem)
                 fringe.push(UNCNode((currentPath.copy(), states),cost ),cost)
     return list()
-
-
 
 # Abbreviations
 bfs = breadth_first_search
