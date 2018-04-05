@@ -111,6 +111,8 @@ def uniform_cost_search(problem):
     """
     fringe=util.PriorityQueue()
     fringe.push(UNCNode((list(),(problem.get_start_state(),None,0)),0),0)
+    winningPath=None
+    winnningCost=0
     visited=set()
     while not fringe.isEmpty():
         currentNode=fringe.pop()
@@ -123,15 +125,58 @@ def uniform_cost_search(problem):
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
         visited.add(currentState)
+
+        if winningPath is not None:
+            if currentCost>=winnningCost:
+                return winningPath
+
         if problem.is_goal_state(currentState):
             return currentPath
         for states in problem.get_successors(currentState):
             if problem.is_goal_state(states[0]):
-                currentPath.append(states[1])
-                return currentPath
-            if states[0] not in visited:
+                if winningPath is None or winnningCost > states[2]:
+                    winningPath=currentPath.copy()
+                    winningPath.append(states[1])
+                    winnningCost=states[2]
+
+            elif states[0] not in visited:
                 fringe.push(UNCNode((currentPath.copy(),states),currentCost+states[2]),currentCost+states[2])
     return list()
+
+import heapq
+class PriorityQueue:
+    """
+      Implements a priority queue data structure. Each inserted item
+      has a priority associated with it and the client is usually interested
+      in quick retrieval of the lowest-priority item in the queue. This
+      data structure allows O(1) access to the lowest-priority item.
+
+      Note that this PriorityQueue does not allow you to change the priority
+      of an item.  However, you may insert the same item multiple times with
+      different priorities.
+    """
+
+    def __init__(self):
+        self.heap = []
+        self.init = False
+
+    def push(self, item, priority):
+        if not self.init:
+            self.init = True
+            try:
+                item < item
+            except:
+                item.__class__.__lt__ = lambda x, y: (True)
+        pair = (priority, item)
+        heapq.heappush(self.heap, pair)
+
+    def pop(self):
+        (priority, item) = heapq.heappop(self.heap)
+        return item
+
+    def isEmpty(self):
+        return len(self.heap) == 0
+
 
 class UNCNode:
     def __init__(self,item,price):
