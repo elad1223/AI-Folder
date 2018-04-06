@@ -122,25 +122,24 @@ def uniform_cost_search(problem):
         currentState=currentTruple[0]
         if currentState in visited:
             continue
-        if currentTruple[1] is not None:
+        if not currentCost==0:
             currentPath.append(currentTruple[1])
         visited.add(currentState)
 
-        if winningPath is not None:
-            if currentCost>=winnningCost:
-                return winningPath
 
-        if problem.is_goal_state(currentState):
-            return currentPath
         for states in problem.get_successors(currentState):
             if problem.is_goal_state(states[0]):
-                if winningPath is None or winnningCost > states[2]:
+                if (winningPath is None) or (currentCost+states[2]<winnningCost): #if we found a better solution
                     winningPath=currentPath.copy()
                     winningPath.append(states[1])
-                    winnningCost=states[2]
+                    winnningCost=states[2]+currentCost
 
             elif states[0] not in visited:
                 fringe.push(UNCNode((currentPath.copy(),states),currentCost+states[2]),currentCost+states[2])
+        if winningPath is not None: #if we pass the score we can return
+            #if currentCost>=winnningCost:
+                return winningPath
+
     return list()
 
 import heapq
