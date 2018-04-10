@@ -125,8 +125,6 @@ def uniform_cost_search(problem):
         if not currentCost==0:
             currentPath.append(currentTruple[1])
         visited.add(currentState)
-
-
         for states in problem.get_successors(currentState):
             if problem.is_goal_state(states[0]):
                 if (winningPath is None) or (currentCost+states[2]<winnningCost): #if we found a better solution
@@ -141,41 +139,6 @@ def uniform_cost_search(problem):
                 return winningPath
 
     return list()
-
-import heapq
-class PriorityQueue:
-    """
-      Implements a priority queue data structure. Each inserted item
-      has a priority associated with it and the client is usually interested
-      in quick retrieval of the lowest-priority item in the queue. This
-      data structure allows O(1) access to the lowest-priority item.
-
-      Note that this PriorityQueue does not allow you to change the priority
-      of an item.  However, you may insert the same item multiple times with
-      different priorities.
-    """
-
-    def __init__(self):
-        self.heap = []
-        self.init = False
-
-    def push(self, item, priority):
-        if not self.init:
-            self.init = True
-            try:
-                item < item
-            except:
-                item.__class__.__lt__ = lambda x, y: (True)
-        pair = (priority, item)
-        heapq.heappush(self.heap, pair)
-
-    def pop(self):
-        (priority, item) = heapq.heappop(self.heap)
-        return item
-
-    def isEmpty(self):
-        return len(self.heap) == 0
-
 
 class UNCNode:
     def __init__(self,item,price):
@@ -198,19 +161,29 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     fringe = util.PriorityQueue()
     fringe.push(UNCNode((list(), (problem.get_start_state(), None, 0)), 0), 0)
-    visited = list()
+    visited = set()
+    winningPath = None
+    winnningCost = 100000
     while not fringe.isEmpty():
         currentNode = fringe.pop()
         currentPath = currentNode.item[0]
         currentTruple = currentNode.item[1]
         currentState = currentTruple[0]
+        if currentState in visited:
+            continue
         if currentTruple[1] is not None:
             currentPath.append(currentTruple[1])
-        visited.append(currentState)
-        if problem.is_goal_state(currentState):
-            return currentPath
+        visited.add(currentState)
+        if winnningCost <= currentNode.price:
+            return winningPath
         for states in problem.get_successors(currentState):
-            if states[0] not in visited:
+            cost = problem.get_cost_of_actions(currentPath) + states[2] + heuristic(states[0], problem)
+            if problem.is_goal_state(states[0]):
+                if (winningPath is None) or (cost<winnningCost): #if we found a better solution
+                    winningPath=currentPath.copy()
+                    winningPath.append(states[1])
+                    winnningCost=cost
+            elif states[0] not in visited:
                 cost=problem.get_cost_of_actions(currentPath) + states[2]+ heuristic(states[0],problem)
                 fringe.push(UNCNode((currentPath.copy(), states),cost ),cost)
     return list()
